@@ -1,0 +1,58 @@
+================================================================================
+ISTRUZIONI PER L'INSTALLAZIONE DEGLI OVERRIDE DI IMPORTAZIONE PRODOTTI
+Versione PrestaShop: 9.0.x e 9.1.x
+================================================================================
+
+Questa guida spiega come installare i file per permettere l'importazione CSV
+senza la colonna "Nome", impostando "n.d." per i nuovi prodotti e mantenendo
+i nomi attuali per quelli esistenti.
+
+--------------------------------------------------------------------------------
+1. FILE DA AGGIUNGERE / SOSTITUIRE
+--------------------------------------------------------------------------------
+
+Devi copiare i due file forniti nelle rispettive cartelle del tuo server.
+NON modificare i file originali nelle cartelle 'classes/' o 'controllers/'.
+
+A) override/classes/Product.php
+   - Scopo: Gestisce l'assegnazione automatica del nome "n.d." e il recupero
+     dei nomi esistenti dal database durante l'importazione.
+
+B) override/controllers/admin/AdminImportController.php
+   - Scopo: Rimuove il blocco di errore iniziale che PrestaShop mostra se
+     manca la mappatura del nome nel CSV.
+
+--------------------------------------------------------------------------------
+2. PROCEDURA DI ATTIVAZIONE
+--------------------------------------------------------------------------------
+
+Dopo aver caricato i file, devi svuotare la cache affinché PrestaShop li rilevi:
+
+1. Vai nel Back Office.
+2. Vai su "Parametri Avanzati" > "Prestazioni".
+3. Clicca sul pulsante "Pulisci la cache" in alto a destra.
+
+In alternativa, elimina manualmente via FTP il file:
+- var/cache/prod/class_index.php  (se sei in modalità produzione)
+- var/cache/dev/class_index.php   (se sei in modalità debug)
+
+--------------------------------------------------------------------------------
+3. COMPATIBILITÀ PRESTASHOP 9.1
+--------------------------------------------------------------------------------
+
+I test effettuati confermano che il codice è PIENAMENTE COMPATIBILE con
+PrestaShop 9.1. La logica del controller di importazione e della classe Product
+non ha subito variazioni strutturali che compromettano questi override.
+
+--------------------------------------------------------------------------------
+4. NOTE PER L'IMPORTAZIONE CSV
+--------------------------------------------------------------------------------
+
+- Durante l'importazione, puoi selezionare "Ignora questa colonna" per il campo Nome.
+- Assicurati di usare il "Riferimento" come chiave per identificare i prodotti
+  esistenti se vuoi che mantengano il loro nome attuale.
+- I nuovi prodotti creati appariranno con il nome "n.d.".
+
+================================================================================
+Fine Istruzioni
+================================================================================
