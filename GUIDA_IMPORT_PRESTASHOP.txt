@@ -1,58 +1,54 @@
 ================================================================================
-ISTRUZIONI PER L'INSTALLAZIONE DEGLI OVERRIDE DI IMPORTAZIONE PRODOTTI
-Versione PrestaShop: 9.0.x e 9.1.x
+IMPORT PRODOTTI SENZA COLONNA "NOME" - PrestaShop 9.0.x / 9.1.x
 ================================================================================
 
-Questa guida spiega come installare i file per permettere l'importazione CSV
-senza la colonna "Nome", impostando "n.d." per i nuovi prodotti e mantenendo
-i nomi attuali per quelli esistenti.
+Permette l'import CSV dei prodotti ignorando la colonna "Nome":
+ - prodotto NUOVO     -> nome "n.d." (e URL ricavato dal Riferimento, se presente)
+ - prodotto ESISTENTE -> mantiene il nome attuale
 
 --------------------------------------------------------------------------------
-1. FILE DA AGGIUNGERE / SOSTITUIRE
+1. FILE
 --------------------------------------------------------------------------------
 
-Devi copiare i due file forniti nelle rispettive cartelle del tuo server.
-NON modificare i file originali nelle cartelle 'classes/' o 'controllers/'.
+Serve UN SOLO file:
+   override/controllers/admin/AdminImportController.php
 
-A) override/classes/Product.php
-   - Scopo: Gestisce l'assegnazione automatica del nome "n.d." e il recupero
-     dei nomi esistenti dal database durante l'importazione.
+NON copiare piu' override/classes/Product.php (era della versione precedente).
+Se lo hai gia' installato, ELIMINALO dal server: non serve piu'.
 
-B) override/controllers/admin/AdminImportController.php
-   - Scopo: Rimuove il blocco di errore iniziale che PrestaShop mostra se
-     manca la mappatura del nome nel CSV.
+Se hai gia' altri override di AdminImportController, unisci a mano il metodo
+productImportOne() invece di sostituire il file.
 
 --------------------------------------------------------------------------------
-2. PROCEDURA DI ATTIVAZIONE
+2. ATTIVAZIONE
 --------------------------------------------------------------------------------
 
-Dopo aver caricato i file, devi svuotare la cache affinché PrestaShop li rilevi:
-
-1. Vai nel Back Office.
-2. Vai su "Parametri Avanzati" > "Prestazioni".
-3. Clicca sul pulsante "Pulisci la cache" in alto a destra.
-
-In alternativa, elimina manualmente via FTP il file:
-- var/cache/prod/class_index.php  (se sei in modalità produzione)
-- var/cache/dev/class_index.php   (se sei in modalità debug)
+Dopo aver caricato (e, se presente, eliminato Product.php) svuota la cache:
+ - Back Office > Parametri Avanzati > Prestazioni > "Pulisci la cache"
+ - oppure elimina via FTP var/cache/prod/class_index.php
+   (var/cache/dev/class_index.php in modalita' debug)
 
 --------------------------------------------------------------------------------
-3. COMPATIBILITÀ PRESTASHOP 9.1
+3. COME FUNZIONA
 --------------------------------------------------------------------------------
 
-I test effettuati confermano che il codice è PIENAMENTE COMPATIBILE con
-PrestaShop 9.1. La logica del controller di importazione e della classe Product
-non ha subito variazioni strutturali che compromettano questi override.
+Nel core (verificato su 9.0.3, 9.1.0 e develop) il campo nome del prodotto non e'
+obbligatorio: l'unico blocco e' un controllo dentro productImportOne(). L'override
+non copia piu' il metodo del core: prima di chiamare il parent compila il nome
+mancante. Cosi' gli aggiornamenti di PrestaShop e le sue correzioni di sicurezza
+restano attivi.
+
+Come viene riconosciuto un prodotto esistente (come fa il core):
+ - con "Forza tutti gli ID" attivo: dall'ID
+ - con "Usa il riferimento come chiave" attivo: dal Riferimento
 
 --------------------------------------------------------------------------------
-4. NOTE PER L'IMPORTAZIONE CSV
+4. NOTE PER IL CSV
 --------------------------------------------------------------------------------
 
-- Durante l'importazione, puoi selezionare "Ignora questa colonna" per il campo Nome.
-- Assicurati di usare il "Riferimento" come chiave per identificare i prodotti
-  esistenti se vuoi che mantengano il loro nome attuale.
-- I nuovi prodotti creati appariranno con il nome "n.d.".
+ - Nel mapping scegli "Ignora questa colonna" per il Nome (o non includerla).
+ - Per mantenere i nomi dei prodotti esistenti attiva "Usa il riferimento come
+   chiave" (o usa gli ID), altrimenti ogni riga viene creata come nuovo prodotto.
+ - Una cella Nome vuota viene trattata come colonna assente.
 
-================================================================================
-Fine Istruzioni
 ================================================================================
