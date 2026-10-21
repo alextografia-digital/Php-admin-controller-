@@ -8,6 +8,9 @@ class AdminImportController extends AdminImportControllerCore
             unset($info['id']);
         }
 
+        // The name column may be ignored in the CSV: fall back to the reference for messages.
+        $productLabel = !empty($info['name']) ? $info['name'] : (!empty($info['reference']) ? $info['reference'] : 'n.d.');
+
         $id_product = null;
         // Use product reference as key
         if (!empty($info['id'])) {
@@ -366,7 +369,7 @@ class AdminImportController extends AdminImportControllerCore
             if (in_array($shop, $shop_ids)) {
                 $shops[] = $shop;
             } else {
-                $this->addProductWarning(Tools::safeOutput($info['name']), $product->id, $this->trans('Shop is not valid', [], 'Admin.Advparameters.Notification'));
+                $this->addProductWarning(Tools::safeOutput($productLabel), $product->id, $this->trans('Shop is not valid', [], 'Admin.Advparameters.Notification'));
             }
         }
         if (empty($shops)) {
@@ -376,7 +379,7 @@ class AdminImportController extends AdminImportControllerCore
         if (!$res) {
             $this->errors[] = sprintf(
                 $this->trans('%1$s (ID: %2$s) cannot be saved', [], 'Admin.Advparameters.Notification'),
-                !empty($info['name']) ? Tools::safeOutput($info['name']) : 'No Name',
+                !empty($info['name']) ? Tools::safeOutput($productLabel) : 'No Name',
                 !empty($info['id']) ? Tools::safeOutput($info['id']) : 'No ID'
             );
             $this->errors[] = ($field_error !== true ? $field_error : '') . ($lang_field_error !== true ? $lang_field_error : '') .
@@ -441,7 +444,7 @@ class AdminImportController extends AdminImportControllerCore
                     $specific_price->from = (isset($info['reduction_from']) && Validate::isDate($info['reduction_from'])) ? $info['reduction_from'] : '0000-00-00 00:00:00';
                     $specific_price->to = (isset($info['reduction_to']) && Validate::isDate($info['reduction_to'])) ? $info['reduction_to'] : '0000-00-00 00:00:00';
                     if (!$validateOnly && !$specific_price->save()) {
-                        $this->addProductWarning(Tools::safeOutput($info['name']), $product->id, $this->trans('Discount is invalid', [], 'Admin.Advparameters.Notification'));
+                        $this->addProductWarning(Tools::safeOutput($productLabel), $product->id, $this->trans('Discount is invalid', [], 'Admin.Advparameters.Notification'));
                     }
                 }
             }
@@ -468,7 +471,7 @@ class AdminImportController extends AdminImportControllerCore
                     foreach ($product->tags as $key => $tags) {
                         $is_tag_added = Tag::addTags($key, $product->id, $tags, $this->multiple_value_separator);
                         if (!$is_tag_added) {
-                            $this->addProductWarning(Tools::safeOutput($info['name']), $product->id, $this->trans('Tags list is invalid', [], 'Admin.Advparameters.Notification'));
+                            $this->addProductWarning(Tools::safeOutput($productLabel), $product->id, $this->trans('Tags list is invalid', [], 'Admin.Advparameters.Notification'));
 
                             break;
                         }
@@ -483,7 +486,7 @@ class AdminImportController extends AdminImportControllerCore
 
                         $is_tag_added = Tag::addTags($key, $product->id, $str, $this->multiple_value_separator);
                         if (!$is_tag_added) {
-                            $this->addProductWarning(Tools::safeOutput($info['name']), (int) $product->id, $this->trans(
+                            $this->addProductWarning(Tools::safeOutput($productLabel), (int) $product->id, $this->trans(
                                 'Invalid tag(s) (%s)',
                                 [$str],
                                 'Admin.Notifications.Error'

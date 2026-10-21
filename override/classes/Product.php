@@ -59,15 +59,6 @@ class Product extends ProductCore
                     $this->name[$id_lang_default] = 'n.d.';
                 }
             }
-
-            // Assicuriamoci che tutte le lingue abbiano un valore per superare la validazione standard
-            if (is_array($this->name) && !empty($this->name[$id_lang_default])) {
-                foreach (Language::getIDs(false) as $id_lang_id) {
-                    if (empty($this->name[$id_lang_id])) {
-                        $this->name[$id_lang_id] = $this->name[$id_lang_default];
-                    }
-                }
-            }
         }
 
         return parent::validateFieldsLang($die, $error_return);
